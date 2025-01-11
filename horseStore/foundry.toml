@@ -1,5 +1,5 @@
 [profile.default]
-src = "src"
+src = "src/v1"
 out = "out"
 libs = ["lib"]
 ffi = true
