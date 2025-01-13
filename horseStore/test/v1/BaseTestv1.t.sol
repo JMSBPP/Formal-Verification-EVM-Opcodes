@@ -1,12 +1,13 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {IHorseStore} from "../../src/v1/interfaces/IHorseStore.sol";
 import {HorseStore} from "../../src/v1/HorseStore.sol";
 import {Test, console2} from "@forge-std/Test.sol";
 abstract contract BaseTestV1 is Test {
-    HorseStore public horseStore;
+    IHorseStore public horseStore;
     function setUp() public virtual {
-        horseStore = new HorseStore();
+        horseStore = IHorseStore(address(new HorseStore()));
     }
 
     function testReadValue() public {
