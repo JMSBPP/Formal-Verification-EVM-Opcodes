@@ -4,3 +4,6 @@
 [submodule "horseStore/lib/foundry-huff"]
 	path = horseStore/lib/foundry-huff
 	url = https://github.com/huff-language/foundry-huff
+[submodule "horseStore/lib/openzeppelin-contracts"]
+	path = horseStore/lib/openzeppelin-contracts
+	url = https://github.com/openzeppelin/openzeppelin-contracts

@@ -12,11 +12,11 @@ object "HorseStoreYul"{
 
             //updateHorseNumber
             case 0xcdfead2e {
-                storeNumber(decodeAsUint(pos))
+                storeNumber(decodeAsUint(0))
 
             }
             case 0xe026c017{
-                returnUint()
+                returnUint(readNumber())
             }
             default {
                 revert(0,0)
@@ -24,6 +24,10 @@ object "HorseStoreYul"{
 
             function storeNumber(newNumber){
                 sstore(0, newNumber)
+            }
+
+            function readNumber() -> storedNumber {
+                storedNumber := sload(0)
             }
 
             function selector() -> s {
@@ -37,6 +41,12 @@ object "HorseStoreYul"{
                 }
                 v := calldataload(pos)
             }
+
+            function returnUint(v){
+                mstore(0,v)
+                return (0, 0x20)
+            }
+
         }
     }
 }
