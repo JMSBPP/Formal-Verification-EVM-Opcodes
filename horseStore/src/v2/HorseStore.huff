@@ -1,20 +1,12 @@
+//------------INTERFACE------------
+#define function _ownedTokens(address,uint256,uint256) nonpayable returns()
+
+//------------STORAGE------------------
+
+#define constant STORAGE_SLOT_0 = FREE_STORAGE_POINTER()
 
 
-//Implementation of iterated mappings
-
-
-//-----solidity----
-//mapping(address => mapping(uint256 => uint256))
-
-//1. mapping(uint256 => uint256)
-
-//key is a value of 256.
-
-//mapping declartation takes up a new slot
-
-
-
-//takes the value of the key which needs to be an uint256
+//-------MACROS-----
 #define macro CONCAT_ELEMENTS() = TAKES(2) RETURNS(1){
     //[element1, element2]
     0x00 //[0x00, element1, element2]
@@ -26,13 +18,117 @@
     return 
 }
 
-#define macro SET_OUTER_MAPPING_OWNED_TOKENS = TAKES(0) RETURNS(1){
-    0x00 calldataload //[0x0000addressuint256]
-    dup1 //[0x0000addressuint256, 0x0000addressuint256]
-    0x20 //[0x20, 0x0000addressuint256, 0x0000addressuint256]
-    shl //[0x0000address00000, 0x0000addressuint256]
-    0x00 mstore 0x14
-    shr //[0x0000uint256]
-    0x20 mstore 
+
+
+#define macro SET_OWNED_TOKENS_VALUE() = TAKES(0) RETURNS(0){
+    0x04 calldataload //[argsEncoded(address, uint256, uint256)]
+    //[0xaddressuint256uint256]
+    dup1 //[0xaddressuint256uint256, 0xaddressuint256uint256]
+    //ACTION: modify the byte to only get the padded uint256 in the middle
+    //[0x000000uint256, 0xaddressuint256uint256]
+    0x00 //[0x00,0x000000uint256, 0xaddressuint256uint256] 
+    mstore 
+    // STACK: [0xaddressuint256uint256]
+    // MEMORY: [0x00: 0x000000uint256(k2)]
+    //store in memory the value (thes most right uint)
+    dup1
+    // STACK: [0xaddressuint256uint256, 0xaddressuint256uint256]
+    // MEMORY: [0x00: 0x000000uint256(k2)]
+    //ACTION: byte manipulation to only get the uint to the most right
+    // STACK: [0x0000000uint256(value), 0xaddressuint256uint256]
+    // MEMORY: [0x00: 0x000000uint256(k2)]
+    0x20 
+    // STACK: [0x20,0x0000000uint256(value), 0xaddressuint256uint256]
+    // MEMORY: [0x00: 0x000000uint256(k2)]
+    mstore 
+
+    // STACK: [0xaddressuint256uint256]
+    // MEMORY: [0x00: 0x000000uint256(k2), 0x20:0x0000000uint256(value)]
+
+    //retieve the address (20 bytes most to the left)
+    0x14 //[0x14,0xaddressuint256uint256]
+    shl //[0xaddress000000000]
+    //pad it to the right
+    //[0x00000address]
+    //put the storage slot
+    STORAGE_SLOT_0 //[0x00,0x00000address0000000 ]
+    CONCAT_ELEMENTS() //[0x00000address0000000]
+    keccak256 //[K(0x00000address0000000)]
+    0x00  //[0x00, K(0x00000address0000000)]
+    mload    //[0x000uint256(k2), K(0x00000address0000000)]
+    swap1   //[K(0x00000address0000000), 0x000uint256(k2)]
+    0x40 //[0x40, K(0x00000address0000000), 0x000uint256(k2)]
+    dup2 //[0x40, K(0x00000address0000000),K(0x00000address0000000), 0x000uint256(k2)]
+    mstore 
+    //STACK: [K(0x00000address0000000), 0x000uint256(k2)]
+    //MEMORY [0x00:0x000000uint256(k2),0x20: 0x0000000uint256,
+    //  0x40:K(0x00000address0000000)]
+    
+    sstore
+    //STORAGE: [K(0x00000address0000000):0x000uint256(k2)]
+    //STACK: [K(0x00000address0000000), 0x000uint256(k2)]
+    //MEMORY [0x00:0x000000uint256(k2),
+    //       0x20: 0x000uint256(v),
+    //       0x40:K(0x00000address(k1)0000000)]
+    CONCAT_ELEMENTS ()
+
+    //STORAGE: [K(0x00000address0000000):0x000uint256(k2)]
+    //STACK: [C(K(0x00000address0000000), 0x000uint256(k2))]
+    //MEMORY [0x00:0x000000uint256(k2),
+    //       0x20: 0x000uint256(v),
+    //       0x40:K(0x00000address(k1)0000000)]
+    keccak256
+    //STORAGE: [K(0x00000address0000000):0x000uint256(k2)]
+    //STACK: [K(C(K(0x00000address0000000), 0x000uint256(k2)))]
+    //MEMORY [0x00:0x000000uint256(k2),
+    //       0x20: 0x000uint256(v),
+    //       0x40:K(0x00000address(k1)0000000)]
+    0x20 mload swap1
+    //STORAGE: [K(0x00000address0000000):0x000uint256(k2)]
+    //STACK: [K(C(K(0x00000address0000000), 0x000uint256(k2))),0x000uint256(v)]
+    //MEMORY [0x00:0x000000uint256(k2),
+    //       0x20: 0x000uint256(v),
+    //       0x40:K(0x00000address(k1)0000000)]
+    sstore 
+    //STORAGE: [
+    //         0x00: mappingDec
+    //        K(0x00000address0000000):0x000uint256(k2),
+    //        ...  
+    //        K(C(K(0x00000address0000000)                                        ]                            
+    //        , 0x000uint256(k2))): 0x000uint256(v)                   ]
+    //STACK: [K(C(K(0x00000address0000000), 0x000uint256(k2))),0x000uint256(v)]
+    //MEMORY [0x00:0x000000uint256(k2),
+    //       0x20: 0x000uint256(v),
+    //       0x40:K(0x00000address(k1)0000000)]
+
+
+
+}
+
+//----------------FUNCTIONDISPATCHER----------------
+
+#define macro FUNCTION_DISPATCHER() = TAKES(1) RETURNS(){
+    //receives the value of the selector
+    //[functionSelector]
+    __FUNC_SIG(_ownedTokens) eq //[_ownedTokens,functionSelector]
+    jumpi //[]
+
+    _ownedTokens:
+        SET_OWNED_TOKENS_VALUE()
+        
+}
+
+//-------------------MAIN-----------------
+
+#define macro MAIN() = TAKES(0) RETURNS(0){
+    //Initialize the slot where the mapping will be stored
+    0x00 calldataload 0xe0 shr //[functionSelector]
+    FUNCTION_DISPATCHER()
+    
+
+    //dispatch the function (FUNCTION DISPATHCER)
+    
+
+
 
 }
