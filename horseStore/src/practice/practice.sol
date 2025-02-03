@@ -23,6 +23,14 @@ contract practice {
         return bytes32(data[32:64]);
     }
 
+    function retreiveK1(bytes calldata data) public pure returns (bytes32) {
+        return bytes32(data[4:32]);
+    }
+
+    function retreiveValue(bytes calldata data) public pure returns (bytes32) {
+        return bytes32(data[64:96]);
+    }
+
     function dataPlusSelector(
         address k1,
         uint256 k2,
@@ -34,5 +42,20 @@ contract practice {
             k2,
             value
         );
+    }
+    function getK2Slot(bytes calldata data) public pure returns (uint256 slot) {
+        bytes32 k1 = retreiveK1(data);
+        bytes32 _slot = bytes32(uint256(0));
+        bytes memory _concat = abi.encodePacked(k1, _slot);
+        slot = uint256(keccak256(_concat));
+    }
+
+    function getValueSlot(
+        bytes calldata data
+    ) public pure returns (uint256 slot) {
+        bytes32 k2 = retreiveK2(data);
+        bytes32 k2Slot = bytes32(getK2Slot(data));
+        bytes memory _concat = abi.encodePacked(k2, k2Slot);
+        slot = uint256(keccak256(_concat));
     }
 }

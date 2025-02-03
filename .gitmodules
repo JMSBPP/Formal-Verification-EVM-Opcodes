@@ -7,3 +7,6 @@
 [submodule "horseStore/lib/openzeppelin-contracts"]
 	path = horseStore/lib/openzeppelin-contracts
 	url = https://github.com/openzeppelin/openzeppelin-contracts
+[submodule "horseStore/lib/huffmate"]
+	path = horseStore/lib/huffmate
+	url = https://github.com/huff-language/huffmate
