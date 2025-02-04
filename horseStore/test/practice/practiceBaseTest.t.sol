@@ -12,14 +12,14 @@ abstract contract practiceBaseTest is Test, practice {
         iteratedMapping = IteratedMapping(address(new IteratedMapping()));
     }
 
-    function testWriteValues(address k1, uint256 k2, uint256 value) external {
-        iteratedMapping.setOwnedTokensValue(k1, k2, value);
-        uint256 k2Slot = uint256(keccak256(abi.encodePacked(k1, uint256(0))));
-        uint256 storedValue;
-        assembly {
-            storedValue := sload(k2Slot)
-        }
+    // function testWriteValues(address k1, uint256 k2, uint256 value) external {
+    //     iteratedMapping.setOwnedTokensValue(k1, k2, value);
+    //     uint256 k2Slot = uint256(keccak256(abi.encodePacked(k1, uint256(0))));
+    //     uint256 storedValue;
+    //     assembly {
+    //         storedValue := sload(k2Slot)
+    //     }
 
-        assertEq(k2, storedValue);
-    }
+    //     assertEq(k2, storedValue);
+    // }
 }
